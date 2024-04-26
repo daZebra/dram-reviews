@@ -2,25 +2,47 @@ import prisma from "./db";
 import { ReviewItem } from "@prisma/client";
 
 export async function getRecentSearches(count = 3) {
-  // Use a raw query to fetch unique reviews based on `searchQuery`
-  const reviews = await prisma.$queryRaw<ReviewItem[]>`
-    SELECT ri.*
-    FROM ReviewItem ri
-    INNER JOIN (
-        SELECT searchQuery, MAX(updatedAt) as maxUpdatedAt
-        FROM ReviewItem
-        GROUP BY searchQuery
-    ) groupedRi ON ri.searchQuery = groupedRi.searchQuery AND ri.updatedAt = groupedRi.maxUpdatedAt
-    ORDER BY ri.updatedAt DESC
-    LIMIT ${count};
-  `;
+  // Use Prisma's groupBy to perform the aggregation
+  const groupedReviews = await prisma.reviewItem.groupBy({
+    by: ["searchQuery"],
+    _max: {
+      updatedAt: true,
+    },
+    orderBy: {
+      _max: {
+        updatedAt: "desc",
+      },
+    },
+    take: count,
+  });
 
-  // Assuming that each review has a 'searchQuery' and 'videoId' field
-  // Map the result to only include these fields
-  const searches = reviews.map((review) => ({
-    query: review.searchQuery,
-    videoId: review.videoId,
-  }));
+  // After getting the latest updates, fetch the corresponding ReviewItems
+  const latestSearches = await Promise.all(
+    groupedReviews.map(async (group) => {
+      if (group._max.updatedAt !== null) {
+        // Check for null explicitly
+        return prisma.reviewItem.findFirst({
+          where: {
+            searchQuery: group.searchQuery,
+            updatedAt: group._max.updatedAt,
+          },
+          select: {
+            searchQuery: true,
+            videoId: true,
+          },
+        });
+      }
+      return null;
+    })
+  );
+
+  // Filter out null results and map to desired structure
+  const searches = latestSearches
+    .filter((review): review is ReviewItem => review !== null)
+    .map((review) => ({
+      query: review.searchQuery,
+      videoId: review.videoId,
+    }));
 
   return { searches };
 }
