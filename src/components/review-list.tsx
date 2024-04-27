@@ -38,7 +38,7 @@ export default function ReviewList({ search }: ReviewListProps) {
           {titleCase(searchText)}
         </span>
       </h2>
-      <section className="flex flex-col w-auto max-w-lg md:max-w-4xl gap-10 justify-center pt-6">
+      <section className="flex flex-col w-auto max-w-sm md:max-w-4xl gap-10 justify-center pt-6">
         {reviews.map((review) => (
           <AccordionCard key={review.videoId} review={review} />
         ))}

@@ -22,18 +22,18 @@ export default function SearchForm() {
     }
   };
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4 ">
       <form
         // action={searchReviews}
         onSubmit={handleSubmit}
-        className="flex items-center gap-4 justify-center  sm:w-[580px] "
+        className="flex flex-col md:flex-row items-center gap-4 justify-center   "
       >
         <input
           name="search"
           type="text"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="input input-primary input-lg w-96"
+          className="input input-primary input-lg w-80 md:w-96"
           placeholder="e.g. Highland Park 12"
           spellCheck="false"
         />

@@ -9,7 +9,7 @@ export default async function Reviews() {
       <h2 className={` text-2xl text-base-content/50`}>
         Browse over {totalCount} reviews
       </h2>
-      <section className="flex flex-col items-center w-full max-w-lg md:max-w-4xl gap-10 py-10">
+      <section className="flex flex-col items-center w-full max-w-sm md:max-w-4xl gap-10 py-10">
         {reviews.map((review) => (
           <div key={review.videoId} className="w-full">
             <AccordionCard key={review.videoId} review={review} />
