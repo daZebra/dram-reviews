@@ -20,32 +20,34 @@ export default function Header() {
   const activePathname = usePathname();
 
   return (
-    <header className="flex justify-between items-center border-b border-neutral/10 h-14 px-3 sm:px-9">
-      <Logo />
-      <nav className="h-full">
-        <ul className="flex gap-x-6 h-full text-sm">
-          {routes.map((route) => (
-            <li
-              key={route.path}
-              className={cn(
-                "font-serif hover:text-base-content flex items-center relative transition",
-                {
-                  "text-base-content": activePathname === route.path,
-                  "text-base-content/50": activePathname !== route.path,
-                }
-              )}
-            >
-              <Link href={route.path}>{route.name}</Link>
-              {activePathname === route.path && (
-                <motion.div
-                  layoutId="header-active-link"
-                  className="bg-primary h-1 w-full absolute bottom-0"
-                />
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <header className="flex w-full">
+      <div className="max-w-7xl mx-auto flex justify-between items-center border-b border-neutral/10 h-14 px-3 sm:px-9 w-full">
+        <Logo />
+        <nav className="h-full">
+          <ul className="flex gap-x-6 h-full text-sm">
+            {routes.map((route) => (
+              <li
+                key={route.path}
+                className={cn(
+                  "font-serif hover:text-base-content flex items-center relative transition",
+                  {
+                    "text-base-content": activePathname === route.path,
+                    "text-base-content/50": activePathname !== route.path,
+                  }
+                )}
+              >
+                <Link href={route.path}>{route.name}</Link>
+                {activePathname === route.path && (
+                  <motion.div
+                    layoutId="header-active-link"
+                    className="bg-primary h-1 w-full absolute bottom-0"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </header>
   );
 }

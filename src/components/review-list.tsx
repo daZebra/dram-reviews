@@ -1,9 +1,9 @@
 "use client";
 
-import handleSearch from "@/lib/search/handleSearch";
+import handleSearch from "@/lib/search/handle-search";
 import AccordionCard from "./accordion-card";
 import { useEffect, useState } from "react";
-import Loading from "@/components/loading";
+import Loading from "@/app/product/[product]/loading";
 import { ReviewItem } from "@prisma/client";
 import { titleCase } from "@/lib/utils";
 
@@ -39,9 +39,9 @@ export default function ReviewList({ search }: ReviewListProps) {
         </span>
       </h2>
       <section className="flex flex-col w-auto max-w-sm md:max-w-4xl gap-10 justify-center pt-6">
-        {reviews.map((review) => (
+        {/* {reviews.map((review) => (
           <AccordionCard key={review.videoId} review={review} />
-        ))}
+        ))} */}
       </section>
     </div>
   );

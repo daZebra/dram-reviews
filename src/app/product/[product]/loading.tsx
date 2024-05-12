@@ -2,14 +2,15 @@
 import { useState, useEffect } from "react";
 import SkeletonCard from "@/components/skeleton-card";
 import { titleCase } from "@/lib/utils";
+import { useParams } from "next/navigation";
 
-type LoadingProps = {
-  search?: string;
-};
+export default function Loading() {
+  const params = useParams<{ product: string }>();
 
-export default function Loading({ search }: LoadingProps) {
+  const search = titleCase(decodeURIComponent(params.product));
+
   const [loadingState, setLoadingState] = useState({
-    text: "Searching Youtube videos for",
+    text: "Searching Youtube reviews for",
     value: 5,
   });
 
@@ -17,19 +18,22 @@ export default function Loading({ search }: LoadingProps) {
     const timeouts = [
       setTimeout(
         () =>
-          setLoadingState({ text: "Getting video transcripts for", value: 25 }),
+          setLoadingState({
+            text: "Getting review transcripts for",
+            value: 25,
+          }),
         4000
       ),
       setTimeout(
         () =>
           setLoadingState({
-            text: "Analyzing video transcripts for",
+            text: "Analyzing review transcripts for",
             value: 50,
           }),
         8000
       ),
       setTimeout(
-        () => setLoadingState({ text: "Fetching reviews for", value: 75 }),
+        () => setLoadingState({ text: "Summarizing reviews for", value: 75 }),
         12000
       ),
     ];

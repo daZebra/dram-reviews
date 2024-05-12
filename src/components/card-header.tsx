@@ -10,7 +10,7 @@ type CardHeaderProps = {
 export default function CardHeader({ onClick, review }: CardHeaderProps) {
   return (
     <section
-      className="flex flex-col md:flex-row justify-between gap-x-20 gap-y-4 p-4 bg-base-200/80 rounded-t-lg text-center md:text-left cursor-pointer"
+      className="flex flex-col md:flex-row justify-between gap-x-20 gap-y-4 p-4 bg-base-200/80 rounded-t-lg text-center md:text-left cursor-pointer  max-w-7xl"
       onClick={onClick}
     >
       <div className="flex flex-col md:flex-row gap-4">

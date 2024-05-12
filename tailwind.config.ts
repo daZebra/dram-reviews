@@ -6,13 +6,36 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+
   theme: {
     extend: {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "radial-top":
+          "radial-gradient(circle at center top, var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+    },
+  },
+
+  purge: {
+    content: [
+      "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+      "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+      "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    ],
+    options: {
+      safelist: [
+        "bg-warning",
+        "text-warning",
+        "bg-error",
+        "text-error",
+        "bg-success",
+        "text-success",
+        "bg-[#52C893]",
+        "text-[#52C893]",
+      ],
     },
   },
 
@@ -28,7 +51,7 @@ const config: Config = {
           neutral: "#15110d",
           "base-100": "#F7F6F5",
           info: "#00d7ff",
-          success: "#008d3c",
+          success: "#68D26D", // Previously #008d3c
           warning: "#ffa200",
           error: "#c5002c",
         },

@@ -12,17 +12,48 @@ datasource db {
 }
 
 model ReviewItem {
-  videoId      String   @id
-  title        String
-  thumbnailUrl String
-  searchQuery  String
-  channelTitle String
-  publishedAt  DateTime
-  transcript   String
-  tasteProfile String
-  whiskyReview String
-  critique     String
-  rating       String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  videoId         String   @id
+  title           String
+  thumbnailUrl    String
+  productName     String   @default("")
+  searchQuery     String
+  channelTitle    String
+  publishedAt     DateTime
+  transcript      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  gptResponse     String   @default("")
+  age             String
+  region          String
+  abv             String
+  tags            String
+  casks           String
+  sentimentScore  Int
+  overallScore    Int
+  priceScore      Int
+  complexityScore Int
+  tasteNotes      String
+  tasteQuotes     String
+  valueQuotes     String
+  opinionQuote    String
+  reviewSummary   String   @default("")
+  blogTitle       String   @default("")
+  blogBody        String   @default("")
+}
+
+model ProductItem {
+  productName     String   @id
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  age             String
+  region          String
+  abv             String
+  tags            String   @default("")
+  casks           String
+  sentimentScore  Int
+  overallScore    Int
+  priceScore      Int
+  complexityScore Int
+  tasteNotes      String
+  reviewSummary   String   @default("")
 }
