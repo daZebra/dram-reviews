@@ -7,7 +7,8 @@ import { useParams } from "next/navigation";
 export default function Loading() {
   const params = useParams<{ product: string }>();
 
-  const search = titleCase(decodeURIComponent(params.product));
+  // Safely access params.product using optional chaining and provide a default value if undefined
+  const search = titleCase(decodeURIComponent(params?.product || ""));
 
   const [loadingState, setLoadingState] = useState({
     text: "Searching Youtube reviews for",
@@ -42,8 +43,9 @@ export default function Loading() {
   }, []); // Empty dependency array to run only once on mount
 
   if (!search) {
-    return;
+    return null; // Return null if search is empty to avoid rendering the rest of the component
   }
+
   const searchString = titleCase(search);
 
   return (
