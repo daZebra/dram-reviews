@@ -74,15 +74,27 @@ export default async function handleSearch(
     const analysisPromises = validTranscripts.map(([, transcript]) =>
       analyzeTranscriptGpt(transcript, query)
     );
-    const analyzedTranscripts = await Promise.all(analysisPromises);
 
+    // Ensuring all transcripts are fetched and analyzed before proceeding
+    const analyzedTranscripts = await Promise.all(analysisPromises);
+    if (analyzedTranscripts.some((at) => !at)) {
+      console.error(
+        "One or more transcripts could not be analyzed successfully."
+      );
+      throw new Error("Failed to analyze all transcripts.");
+    }
+
+    // Proceed with creating/updating database entries only after successful analysis
     const productSummary = await summarizeProductGpt(
       JSON.stringify(analyzedTranscripts)
     );
-
     const productName = productSummary.whiskyName.toLowerCase();
 
     for (const [index, analyzedTranscript] of analyzedTranscripts.entries()) {
+      if (!analyzedTranscript) {
+        console.error("Analyzed transcript is undefined at index", index);
+        continue; // Skip this iteration if the analyzed data is undefined
+      }
       const [videoId] = validTranscripts[index];
       const videoResult = videoResults.find(
         (video: VideoResult) => video.id === videoId
@@ -114,7 +126,7 @@ export default async function handleSearch(
         reviewSummary: analyzedTranscript.summary,
       };
 
-      console.log("Adding item to prisma: " + review.title);
+      console.log("Adding review item to prisma: " + review.title);
 
       await prisma.reviewItem.upsert({
         where: { videoId },
@@ -138,7 +150,12 @@ export default async function handleSearch(
       reviewSummary: productSummary.summary,
     };
 
-    console.log("ProductItem: " + JSON.stringify(productItem));
+    console.log(
+      "Adding product item to prisma: " +
+        productName +
+        ". Summary: " +
+        productItem.reviewSummary
+    );
 
     await prisma.productItem.upsert({
       where: { productName },

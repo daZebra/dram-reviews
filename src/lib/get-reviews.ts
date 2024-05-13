@@ -6,13 +6,19 @@ export async function getReviews(searchQuery: string) {
 
   const reviews = await prisma.reviewItem.findMany({
     where: {
-      searchQuery: lowerCaseSearchQuery,
+      OR: [
+        { searchQuery: lowerCaseSearchQuery },
+        { productName: lowerCaseSearchQuery },
+      ],
     },
   });
 
   const totalCount = await prisma.reviewItem.count({
     where: {
-      searchQuery: lowerCaseSearchQuery,
+      OR: [
+        { searchQuery: lowerCaseSearchQuery },
+        { productName: lowerCaseSearchQuery },
+      ],
     },
   });
   return { reviews, totalCount };

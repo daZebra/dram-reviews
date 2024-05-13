@@ -1,10 +1,26 @@
+import { Prisma, ProductItem } from "@prisma/client";
 import prisma from "./db";
 
-export async function getProducts(queryParams = {}) {
+type ProductQueryParams = {
+  casks?: string[];
+  tasteNotes?: string[];
+  tags?: string[];
+};
+
+type ProductsResponse = {
+  products: ProductItem[];
+  totalCount: number;
+};
+
+export async function getProducts(
+  queryParams: ProductQueryParams = {}
+): Promise<ProductsResponse> {
   // Construct the where condition dynamically based on queryParams input
   // console.log(queryParams);
-  let whereCondition = {};
-  let arrayFields = ["tasteNotes", "casks", "tags"]; // Add any other array fields here
+  let whereCondition: {
+    AND?: Prisma.ProductItemWhereInput[];
+  } = {};
+  let arrayFields = ["tasteNotes", "casks", "tags"] as const; // Add any other array fields here
 
   // Check if queryParams contain only valid fields
   const isValidQuery = Object.keys(queryParams).every((key) =>
@@ -13,26 +29,29 @@ export async function getProducts(queryParams = {}) {
 
   if (!isValidQuery) {
     // If an invalid field is found, return all products
-    return await prisma.productItem.findMany({
-      orderBy: {
-        sentimentScore: "desc",
-      },
-    });
+    return {
+      products: await prisma.productItem.findMany({
+        orderBy: {
+          sentimentScore: "desc",
+        },
+      }),
+      totalCount: await prisma.productItem.count(),
+    };
   }
 
   // Build the where condition based on the queryParams
-  let andCondition = [];
+  let andCondition: Prisma.ProductItemWhereInput[] = [];
   for (const [key, value] of Object.entries(queryParams)) {
-    if (arrayFields.includes(key)) {
+    if (arrayFields.includes(key as (typeof arrayFields)[number])) {
       if (Array.isArray(value)) {
         // Create an AND condition for multiple values
         const conditions = value.map((v) => ({ [key]: { contains: v } }));
         andCondition.push(...conditions);
       } else {
         // Handle single value condition
-        whereCondition[key] = {
-          contains: value,
-        };
+        let whereCondition: {
+          [key: string]: Prisma.ProductItemWhereInput | undefined;
+        } = {};
       }
     }
   }

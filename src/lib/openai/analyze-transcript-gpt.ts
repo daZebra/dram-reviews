@@ -1,10 +1,14 @@
 import axios, { AxiosError } from "axios";
 
 const assistantPrompt = () => {
-  return `You will be provided with a transcript from a YouTube video reviewing a specific whisky bottle. If the video provided is not a whisky review, return an empty object.
-  If you suspect errors in the original transcript, correct them. Errors can include mispelled product name, unecessary capitalization, or errors in transcription (e.g. 'X Sherry cask' instead of 'ex-sherry cask').
-  For scores, try to avoid a sentiment score of 80 or a score of 8/10. Either go higher for good reviews, or lower for bad ones. If multiple whiskies are mentioned, only pay attention to the one I asked you to review.
-  Analyze the transcript to extract the following information and respond in JSON format.
+  return `
+  You will receive a transcript from a Youtube video reviewing a whisky bottle.
+  First read the review carefully.
+  If there are no mention of whisky, return "NOT A WHISKY REVIEW"
+  If you suspect errors in the transcript, correct them. Errors can include mispelled product name, unecessary capitalization, or errors in transcription.
+  Avoid generating scores of 80 or 8/10. Rate good reviews higher than 80% and bad reviews lower than 80%.
+  If many whiskies are mentioned in the transcript, only pay attention to the one I asked you to review.
+  Analyze the transcript to extract the following information and respond in JSON format. Do not ommit any fields.
 
 Example of expected output:
 {
@@ -24,7 +28,8 @@ Example of expected output:
   "priceScore": 7.5, // If the reviewer mentions a good bargain, good value for money, or affordability, it's a 9 or 10. If they say it is expensive or not worth the price, it is between 5 and 7.
   "complexityScore": 8.5, // Look at the number of different taste notes mentioned and whether they form a complex or simple profile. If the reviewer mentions "complex" or "advanced" in the transcript, put a 9 or 10. If they say "basic" or "simple" put a 5, 6 or 7.
   "overallScore": 8, // Assess the overall rating of the whisky out of 10 based on sentiment, price and complexity.
-}`;
+}
+`;
 };
 
 async function analyzeTranscriptGpt(transcriptText: string, query: string) {
@@ -58,6 +63,11 @@ async function analyzeTranscriptGpt(transcriptText: string, query: string) {
     if (response.status === 200 && response.data.choices.length > 0) {
       // Extract the content from the first choice's message
       const content = response.data.choices[0].message.content;
+      console.log(
+        "---------ChatGPT Analyzed Transcript -------- ",
+        content
+        // response.data.choices[0].finish_reason
+      );
       return JSON.parse(content); // Assuming the content is in JSON string format
     } else {
       console.error("Non-200 response or no choices available", response.data);

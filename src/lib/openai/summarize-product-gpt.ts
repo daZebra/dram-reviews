@@ -1,12 +1,13 @@
 import axios, { AxiosError } from "axios";
 
 const assistantPrompt = () => {
-  return `Your job is to craft a product summary based on multiple review objects (in JSON format). 
-  Read each review carefully to craft a product summary that distills the key insights from each review. 
+  return `
+  Your job is to craft a whisky summary based on multiple review objects (in JSON format).
+  Your summary should distill the key insights from each review.
   Average numerical values, except ABV. If ABV differs between reviews, pick the lowest one. 
-  Avoid repeating words that mean almost the same thing, instead focus on reflecting the intent of the reviews.
+  Avoid repetition whenever possible.
   If the "age" is not specified, put "non-age statement".
-  Limit maximum number of tastingNotes to 10, focussing the most frequently mentioned notes. Order them from most important to least. 
+  Limit maximum number of tastingNotes to 10, focussing on the most frequently mentioned notes. Order them from most important to least. 
   Sentiment score is out of 100, other scores are out of 10.
   Ensure the whiskyName is properly spelled, do not put "years old" after the number of years (e.g. just write "Highland Park 12"). 
   All fields are required. NEVER LEAVE A FIELD EMPTY!
@@ -56,6 +57,15 @@ const summarizeProductGpt = async (reviewObjects: string) => {
     if (response.status === 200 && response.data.choices.length > 0) {
       // Extract the content from the first choice's message
       const content = response.data.choices[0].message.content;
+
+      console.log(
+        " ---------- Analyze Transcript Finish Reason ----------: " +
+          response.data.choices[0].finish_reason
+      );
+      console.log(
+        " ---------- Analyze Transcript Response ----------: " + content
+      );
+
       return JSON.parse(content); // Assuming the content is in JSON string format
     } else {
       console.error("Non-200 response or no choices available", response.data);
