@@ -4,19 +4,25 @@ import { getProducts, ProductQueryParams } from "@/lib/get-products";
 export default async function Reviews({
   searchParams,
 }: {
-  searchParams: URLSearchParams;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  // Convert URLSearchParams to ProductQueryParams
+  // Convert searchParams object to ProductQueryParams
   const productQueryParams: ProductQueryParams = {};
 
-  if (searchParams.has("casks")) {
-    productQueryParams.casks = searchParams.getAll("casks");
+  if (searchParams.casks) {
+    productQueryParams.casks = Array.isArray(searchParams.casks)
+      ? searchParams.casks
+      : [searchParams.casks];
   }
-  if (searchParams.has("tasteNotes")) {
-    productQueryParams.tasteNotes = searchParams.getAll("tasteNotes");
+  if (searchParams.tasteNotes) {
+    productQueryParams.tasteNotes = Array.isArray(searchParams.tasteNotes)
+      ? searchParams.tasteNotes
+      : [searchParams.tasteNotes];
   }
-  if (searchParams.has("tags")) {
-    productQueryParams.tags = searchParams.getAll("tags");
+  if (searchParams.tags) {
+    productQueryParams.tags = Array.isArray(searchParams.tags)
+      ? searchParams.tags
+      : [searchParams.tags];
   }
 
   const { products, totalCount } = await getProducts(productQueryParams);
@@ -27,10 +33,10 @@ export default async function Reviews({
 
   return (
     <div className="flex flex-col items-center text-center my-10">
-      <h2 className={` text-2xl text-base-content/50`}>
+      <h2 className={`text-2xl text-base-content/50`}>
         {totalCount === 0
           ? "No products found, try a different search"
-          : Object.keys(searchParams).length > 0
+          : Object.keys(productQueryParams).length > 0
           ? `${totalCount} whiskies found`
           : `Expert reviews for over ${totalCount} whiskies`}
       </h2>

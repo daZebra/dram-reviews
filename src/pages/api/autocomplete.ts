@@ -8,7 +8,7 @@ type Data = {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<Data>
 ) {
   try {
     const { query } = req.query;
@@ -16,10 +16,13 @@ export default async function handler(
       return res.status(400).json({ error: "Query parameter is required" });
     }
 
+    // Ensure query is a string
+    const searchString = Array.isArray(query) ? query[0] : query;
+
     const productNames = await prisma.productItem.findMany({
       where: {
         productName: {
-          startsWith: query,
+          startsWith: searchString,
           // mode: "insensitive",
         },
       },
@@ -29,7 +32,10 @@ export default async function handler(
       take: 5,
     });
 
-    res.status(200).json(productNames.map((item) => item.productName));
+    // Respond with productNames in the correct format
+    res
+      .status(200)
+      .json({ productNames: productNames.map((item) => item.productName) });
   } catch (error) {
     console.error("Error in autocomplete API:", error);
     res.status(500).json({ error: "Internal Server Error" });

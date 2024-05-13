@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 
 export default function SearchForm() {
   const [searchText, setSearchText] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -16,7 +16,7 @@ export default function SearchForm() {
       fetch(`/api/autocomplete?query=${encodeURIComponent(searchText)}`)
         .then((response) => response.json())
         .then((data) => {
-          setSuggestions(data);
+          setSuggestions(data.productNames || []); // Use productNames from the response
         })
         .catch(() => {
           setSuggestions([]);
@@ -26,22 +26,22 @@ export default function SearchForm() {
     }
   }, [searchText]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!searchText || searchText.length <= MIN_SEARCH_CHAR) {
       setError("Please enter a longer product name.");
       return;
     } else {
       setError("");
-      router.push(`/product/${encodeURI(searchText)}`);
+      router.push(`/product/${encodeURIComponent(searchText)}`);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 ">
+    <div className="flex flex-col items-center justify-center gap-4">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col md:flex-row items-center md:items-start gap-4 justify-center   "
+        className="flex flex-col md:flex-row items-center md:items-start gap-4 justify-center"
       >
         <div>
           <input
@@ -54,11 +54,11 @@ export default function SearchForm() {
             spellCheck="false"
           />
           {suggestions.length > 0 && (
-            <ul className="autocomplete-results bg-base-200/60">
+            <ul className="autocomplete-results bg-base-200/60 rounded-lg">
               {suggestions.map((name, index) => (
                 <li
                   key={index}
-                  className="p-2 hover:bg-base-200 cursor-pointer"
+                  className="p-2 hover:bg-base-200 cursor-pointer "
                   onClick={() => {
                     setSearchText(name);
                     setSuggestions([]);
@@ -72,10 +72,10 @@ export default function SearchForm() {
         </div>
         <button
           type="submit"
-          className="btn btn-primary btn-lg text-white w-36 "
+          className="btn btn-primary btn-lg text-white w-36"
         >
           Search
-        </button>{" "}
+        </button>
       </form>
       {error.length > 0 ? <div className="text-error pt-4">{error}</div> : null}
     </div>
