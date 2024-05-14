@@ -1,5 +1,5 @@
 export const MIN_REVIEW_COUNT = 1;
-export const MAX_YT_RESULTS = 2;
+export const MAX_YT_RESULTS = 6;
 export const MIN_SEARCH_CHAR = 6;
 
 export const FLAVOUR_WORDS = [
