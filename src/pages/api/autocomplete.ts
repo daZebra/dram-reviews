@@ -34,8 +34,6 @@ export default async function handler(
       take: 5,
     });
 
-    console.log(`Product names found: ${JSON.stringify(productNames)}`); // Log the result
-
     // Respond with productNames in the correct format
     res
       .status(200)

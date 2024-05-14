@@ -58,13 +58,13 @@ const summarizeProductGpt = async (reviewObjects: string) => {
       // Extract the content from the first choice's message
       const content = response.data.choices[0].message.content;
 
-      console.log(
-        " ---------- Analyze Transcript Finish Reason ----------: " +
-          response.data.choices[0].finish_reason
-      );
-      console.log(
-        " ---------- Analyze Transcript Response ----------: " + content
-      );
+      // console.log(
+      //   " ---------- Analyze Transcript Finish Reason ----------: " +
+      //     response.data.choices[0].finish_reason
+      // );
+      // console.log(
+      //   " ---------- Analyze Transcript Response ----------: " + content
+      // );
 
       return JSON.parse(content); // Assuming the content is in JSON string format
     } else {
