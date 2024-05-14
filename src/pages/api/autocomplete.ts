@@ -32,6 +32,8 @@ export default async function handler(
       take: 5,
     });
 
+    console.log("autocomplete productNames: ", productNames);
+
     // Respond with productNames in the correct format
     res
       .status(200)

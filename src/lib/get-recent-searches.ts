@@ -11,6 +11,7 @@ export async function getRecentSearches(count = 3) {
 
     return recentProducts.map((product) => product.productName);
   } catch (error) {
+    console.log("Failed to fetch recent product names:", error);
     console.error("Failed to fetch recent product names:", error);
     return [];
   }
