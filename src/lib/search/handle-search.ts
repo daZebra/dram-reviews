@@ -1,5 +1,4 @@
-export const maxDuration = 30; // This function can run for a maximum of 30 seconds
-export const dynamic = "force-dynamic";
+"use server";
 
 import { ProductItem, ReviewItem } from "@prisma/client";
 import { MIN_REVIEW_COUNT, MIN_SEARCH_CHAR } from "../const";

@@ -1,3 +1,5 @@
+export const maxDuration = 30; // This function can run for a maximum of 30 seconds
+
 import Badge from "@/components/badge";
 import QuoteCard from "@/components/quote-card";
 import { RadialProgress } from "@/components/radial-progress";

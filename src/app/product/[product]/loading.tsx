@@ -1,4 +1,5 @@
 "use client";
+export const maxDuration = 30; // This function can run for a maximum of 30 seconds
 import { useState, useEffect } from "react";
 import SkeletonCard from "@/components/skeleton-card";
 import { titleCase } from "@/lib/utils";
