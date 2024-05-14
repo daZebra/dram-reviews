@@ -18,12 +18,14 @@ export default async function handler(
 
     // Ensure query is a string
     const searchString = Array.isArray(query) ? query[0] : query;
+    console.log(`Search string: ${searchString}`); // Log the search string
 
+    // Make the search case-insensitive
     const productNames = await prisma.productItem.findMany({
       where: {
         productName: {
           startsWith: searchString,
-          // mode: "insensitive",
+          mode: "insensitive", // Make the search case-insensitive
         },
       },
       select: {
@@ -32,7 +34,7 @@ export default async function handler(
       take: 5,
     });
 
-    console.log("autocomplete productNames: ", productNames);
+    console.log(`Product names found: ${JSON.stringify(productNames)}`); // Log the result
 
     // Respond with productNames in the correct format
     res
