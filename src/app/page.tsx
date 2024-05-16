@@ -148,8 +148,7 @@ export default function Home({ searchParams }: HomeProps) {
       {/* VP2 Section */}
       <HomeSection
         sectionTitle="Hear It Straight From The Experts"
-        sectionParagraph="Direct insights from top whisky experts, enhancing your selection
-        process with trusted opinions."
+        sectionParagraph="Stop shooting in the dark with every purchase. Let your favorite reviewers guide your selection process with their unfettered insights."
         imgPath="/lottie-quotes.json"
       >
         <span className="md:flex w-8 h-8 rounded-md bg-accent justify-center items-center shadow-md shadow-accent/50 hidden md:visible">
@@ -160,8 +159,7 @@ export default function Home({ searchParams }: HomeProps) {
       {/* VP3 Section */}
       <HomeSection
         sectionTitle="Your Go-To Whisky Discovery Tool"
-        sectionParagraph="Use our smart search to find whiskies by taste, cask, or age —
-        perfectly tailored to your preferences."
+        sectionParagraph="Discover more of what you love by searching based on taste notes (e.g. smoky, briny, floral) or cask type (e.g. oloroso, madeira)."
         imgPath="/lottie-filters.json"
       >
         <span className="md:flex w-8 h-8 rounded-md bg-secondary justify-center items-center shadow-md shadow-secondary/50 hidden md:visible">
