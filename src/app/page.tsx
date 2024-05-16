@@ -98,16 +98,15 @@ export default function Home({ searchParams }: HomeProps) {
                 </h3>
                 <ul className="flex flex-col gap-2">
                   <ListItem sign={false}>
-                    Peer reviews vary widely in quality and relevance, making it
-                    difficult to gauge a whisky&#39;s true character.
+                    Some peer reviews are reliable, but most aren&#39;t.
                   </ListItem>
                   <ListItem sign={false}>
-                    Expert insights are valuable but buried in lengthy videos or
-                    articles, taking forever to get to what matters.
+                    Expert reviews are great, but they are buried in long-form
+                    videos.
                   </ListItem>
                   <ListItem sign={false}>
-                    Finding whiskies that are right for your palate involves a
-                    lot of costly trial-and-error.{" "}
+                    You have to buy a lot of so-so bottles to find one you truly
+                    love.
                   </ListItem>
                 </ul>
               </div>
@@ -240,7 +239,7 @@ function HomeSection({
           <p className="text-lg text-base-content/60">{sectionParagraph}</p>
         </div>
 
-        <div className="flex flex-col items-left w-3/4 md:w-1/2 rounded-2xl overflow-hidden ">
+        <div className="flex flex-col items-left px-8 md:px-0 md:w-1/2 rounded-2xl overflow-hidden ">
           <LottiImg imgUrl={imgPath} />
         </div>
       </div>
