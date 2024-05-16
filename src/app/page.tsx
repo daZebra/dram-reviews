@@ -98,15 +98,15 @@ export default function Home({ searchParams }: HomeProps) {
                 </h3>
                 <ul className="flex flex-col gap-2">
                   <ListItem sign={false}>
-                    Some peer reviews are reliable, but most aren&#39;t.
+                    Peer reviews are too subjective to be useful.
                   </ListItem>
                   <ListItem sign={false}>
-                    Expert reviews are great, but they are buried in long-form
-                    videos.
+                    Expert reviews would be great if they weren&#39;t buried in
+                    long-form videos.
                   </ListItem>
                   <ListItem sign={false}>
-                    You have to buy a lot of so-so bottles to find one you truly
-                    love.
+                    You end up buying a lot of mediocre bottles to find the ones
+                    you truly love.
                   </ListItem>
                 </ul>
               </div>
