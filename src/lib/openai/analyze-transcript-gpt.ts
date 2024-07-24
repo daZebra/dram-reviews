@@ -41,7 +41,7 @@ async function analyzeTranscriptGpt(transcriptText: string, query: string) {
     const response = await axios.post(
       apiUrl,
       {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: assistantMessage },
           {
