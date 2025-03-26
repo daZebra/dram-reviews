@@ -201,15 +201,16 @@ async function fetchYoutubeData(query: string) {
 
     // Check if we're in a browser environment
     if (typeof window === "undefined") {
-      // Server-side: need to use absolute URL
-      // For Server API routes calling other API routes in the same app, we should
-      // use a relative URL to avoid authentication issues
+      // Server-side: For Node.js server environments, we need to use a fully qualified URL
+      // BUT we need to make sure we're making an internal request (same host)
+      // This avoids authentication requirements while ensuring a valid URL for fetch
 
-      // This is a key change: In server components, we should ALWAYS use a relative URL
-      // when accessing our own API routes to avoid authentication issues
-      apiUrl = "/api/transcripts";
+      // For an absolute URL that's treated as "same-origin" in Node.js environments
+      apiUrl = new URL("/api/transcripts", "http://localhost").href;
 
-      logger.debug(`Using relative API URL for server-side: ${apiUrl}`);
+      logger.debug(
+        `Using absolute but same-origin API URL for server-side: ${apiUrl}`
+      );
       logger.debug(`Environment variables for debugging:
         VERCEL_URL: ${process.env.VERCEL_URL || "not set"}
         NEXT_PUBLIC_APP_URL: ${process.env.NEXT_PUBLIC_APP_URL || "not set"}
