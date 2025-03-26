@@ -40,7 +40,7 @@ export default async function Reviews({
           ? `${totalCount} whiskies found`
           : `Expert reviews for over ${totalCount} whiskies`}
       </h2>
-      <section className="flex flex-col items-center w-full px-8 md:max-w-4xl gap-10 py-10 ">
+      <section className="flex flex-col items-center w-full px-8 md:max-w-4xl gap-10 py-10">
         {products.map((product) => (
           <ProductOverviewCard key={product.productName} product={product} />
         ))}
