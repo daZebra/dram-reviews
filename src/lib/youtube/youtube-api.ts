@@ -2,14 +2,7 @@
  * YouTube API module for fetching transcripts
  */
 import { logger } from "@/lib/logger";
-import { YoutubeTranscript } from "youtube-transcript";
-
-// Define the interface for transcript items
-interface TranscriptItem {
-  text: string;
-  duration: number;
-  offset: number;
-}
+import { YoutubeTranscript, TranscriptResponse } from "youtube-transcript";
 
 /**
  * Fetches the transcript for a YouTube video using youtube-transcript npm package
@@ -21,9 +14,7 @@ export async function fetchTranscript(videoId: string): Promise<string> {
 
   try {
     // Fetch transcript using the youtube-transcript npm package
-    const transcriptItems = (await YoutubeTranscript.fetchTranscript(
-      videoId
-    )) as TranscriptItem[];
+    const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId);
 
     if (!transcriptItems || transcriptItems.length === 0) {
       logger.warn(`No transcript found for video ${videoId}`);
@@ -32,7 +23,7 @@ export async function fetchTranscript(videoId: string): Promise<string> {
 
     // Join all transcript pieces into a single string
     const fullTranscript = transcriptItems
-      .map((item: TranscriptItem) => item.text)
+      .map((item: TranscriptResponse) => item.text)
       .join(" ");
 
     if (fullTranscript.length < 50) {
