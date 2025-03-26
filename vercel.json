@@ -2,9 +2,13 @@
   "buildCommand": "pip install youtube-transcript-api && next build",
   "installCommand": "npm install && pip install youtube-transcript-api",
   "functions": {
-    "api/transcripts": {
+    "app/api/transcripts/route": {
       "memory": 1024,
       "maxDuration": 60
+    },
+    "app/api/autocomplete/route": {
+      "memory": 512,
+      "maxDuration": 10
     }
   },
   "env": {
