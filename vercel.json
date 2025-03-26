@@ -6,12 +6,12 @@
     "app/api/transcripts/route": {
       "memory": 1024,
       "maxDuration": 60,
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs@18.x"
     },
     "app/api/autocomplete/route": {
       "memory": 512,
       "maxDuration": 10,
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs@18.x"
     }
   },
   "env": {
