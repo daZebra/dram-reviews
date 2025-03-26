@@ -101,7 +101,7 @@ export default function Home({ searchParams }: HomeProps) {
                     Peer reviews are too subjective to be useful.
                   </ListItem>
                   <ListItem sign={false}>
-                    Expert reviews would be great if they weren't buried in
+                    Expert reviews would be great if they weren&apos;t buried in
                     long-form videos.
                   </ListItem>
                   <ListItem sign={false}>
@@ -171,8 +171,8 @@ export default function Home({ searchParams }: HomeProps) {
       <section className="flex justify-center w-full  py-32 bg-neutral-800 text-white">
         <div className="flex flex-col max-w-2xl px-4 text-center  items-center">
           <p className="text-2xl font-serif font-bold">
-            Dram Reviews makes it feel like I've got a whisky expert right by my
-            side advising me on the best whiskies to try. I love it!
+            Dram Reviews makes it feel like I&apos;ve got a whisky expert right
+            by my side advising me on the best whiskies to try. I love it!
           </p>
           <div className="flex items-start gap-2 mt-4">
             <Image

@@ -67,12 +67,12 @@ export default function SearchPage({ query, searchResults }: SearchPageProps) {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">
-          Search Results for "{query}"
+          Search Results for &quot;{query}&quot;
         </h1>
         <div className="bg-amber-50 border border-amber-300 text-amber-800 p-4 rounded">
           <p>No results found for this search query.</p>
           <p className="mt-2">
-            We're still working on expanding our database. Please try a
+            We&apos;re still working on expanding our database. Please try a
             different search term or check back later.
           </p>
           <Link href="/" className="text-blue-600 hover:underline block mt-4">
@@ -95,7 +95,9 @@ export default function SearchPage({ query, searchResults }: SearchPageProps) {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Search Results for "{query}"</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Search Results for &quot;{query}&quot;
+      </h1>
 
       {product && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -224,7 +226,7 @@ export default function SearchPage({ query, searchResults }: SearchPageProps) {
         <div className="bg-amber-50 border border-amber-300 text-amber-800 p-4 rounded">
           <p>No reviews found for this search query.</p>
           <p className="mt-2">
-            We're still working on expanding our database. Please try a
+            We&apos;re still working on expanding our database. Please try a
             different search term or check back later.
           </p>
         </div>
