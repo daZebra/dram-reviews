@@ -1,71 +1,55 @@
 # YouTube Transcript Testing Tools
 
-This directory contains tools to test YouTube transcript fetching using both the current cloud function approach and the direct YouTube Transcript API approach.
+This directory contains tools to test YouTube transcript fetching using the `youtube-transcript` npm package.
 
-## Testing Options
+## Testing the API
 
-You have two options for testing:
-
-1. **TypeScript Test** - Tests the current cloud function and has commented code for direct API usage
-2. **Python Test** - Fully functional test of both approaches (recommended for initial testing)
-
-## Option 1: TypeScript Test
-
-### Setup
+You can test the transcript API endpoint using the provided test scripts:
 
 ```bash
-# Navigate to this directory
-cd src/lib/youtube
+# Start your Next.js server in one terminal
+npm run dev
 
-# Install dependencies
-npm run install-deps
-
-# Run the test with a YouTube video ID
-npx ts-node transcript-test.ts dQw4w9WgXcQ
+# In another terminal, run the test script
+node src/lib/youtube/test-api.js
 ```
 
-This test will show you the results from the cloud function. To test the direct API approach, you'll need to:
+This test will fetch transcripts for a set of predefined YouTube video IDs and display the results.
 
-1. Install the YouTube Transcript API package: `npm install youtube-transcript-api`
-2. Uncomment the code in the `testDirectApi` function in `transcript-test.ts`
+## Testing Specific Video IDs
 
-## Option 2: Python Test (Recommended)
-
-The Python test is recommended because the YouTube Transcript API was originally designed for Python and has more features available.
-
-### Setup
+To test specific YouTube video IDs:
 
 ```bash
-# Install Python dependencies
-pip install youtube-transcript-api requests
+# Start your Next.js server first
+npm run dev
 
-# Run the test with a YouTube video ID
-python src/lib/youtube/transcript-test.py dQw4w9WgXcQ
+# In another terminal, run the specific IDs test script
+node src/lib/youtube/test-specific-ids.js
 ```
-
-This will test both approaches and show you detailed information about available transcripts.
 
 ## Test Videos
 
-Try these video IDs that should have transcripts:
+The test scripts use these video IDs that should have transcripts:
 
-- `dQw4w9WgXcQ` - Rick Astley - Never Gonna Give You Up
-- `jNQXAC9IVRw` - Me at the zoo (First YouTube video)
-- `eg-F_NNTbLE` - Whisky Review/Tasting: Scapa Skiren
+- `TI0Q7z-4VLs` - Whisky review 1
+- `jESHMGi-Ro4` - Whisky review 2
+- `7S3kIskUZN0` - Whisky review 3
 
 ## Analyzing Results
 
-Compare the results from both approaches to see:
+The test scripts will provide information about:
 
 1. Whether transcripts are available for each video
-2. If the cloud function is retrieving transcripts correctly
-3. What languages are available for each video
-4. The quality and length of transcripts
+2. The length of each transcript
+3. A preview of the transcript content
 
-## Next Steps
+## Implementation Details
 
-After testing, you can decide whether to:
+This application uses the `youtube-transcript` npm package to fetch transcripts from YouTube videos. The package provides:
 
-1. Fix the cloud function implementation
-2. Implement the YouTube Transcript API directly in your Next.js application
-3. Create a new API endpoint in your Next.js app that uses the YouTube Transcript API
+1. Support for auto-generated captions
+2. Language selection (though we default to English)
+3. Error handling for cases where transcripts aren't available
+
+The implementation can be found in `youtube-api.ts` which provides a clean interface to the transcript API.

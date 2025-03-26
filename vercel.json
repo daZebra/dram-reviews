@@ -1,14 +1,17 @@
 {
-  "buildCommand": "pip install youtube-transcript-api && next build",
-  "installCommand": "npm install && pip install youtube-transcript-api",
+  "buildCommand": "next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
   "functions": {
     "app/api/transcripts/route": {
       "memory": 1024,
-      "maxDuration": 60
+      "maxDuration": 60,
+      "runtime": "nodejs18.x"
     },
     "app/api/autocomplete/route": {
       "memory": 512,
-      "maxDuration": 10
+      "maxDuration": 10,
+      "runtime": "nodejs18.x"
     }
   },
   "env": {
