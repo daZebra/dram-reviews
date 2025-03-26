@@ -269,7 +269,7 @@ async function fetchYoutubeData(query: string) {
     if (usableTranscripts.length === 0) {
       logger.warn(`No valid transcripts found, search may not yield results`);
       logger.warn(
-        `To enable transcript fetching, please ensure the required Python package is installed: pip install youtube-transcript-api`
+        `To enable transcript fetching, make sure the API is properly configured and the youtube-transcript package is installed.`
       );
     }
 

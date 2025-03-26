@@ -1,17 +1,5 @@
 {
-  "buildCommand": "next build",
-  "installCommand": "npm install",
   "framework": "nextjs",
-  "functions": {
-    "app/api/transcripts/route": {
-      "memory": 1024,
-      "maxDuration": 60
-    },
-    "app/api/autocomplete/route": {
-      "memory": 512,
-      "maxDuration": 10
-    }
-  },
   "env": {
     "NEXT_PUBLIC_APP_URL": "https://${VERCEL_URL}"
   }
