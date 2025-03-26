@@ -195,17 +195,15 @@ async function fetchYoutubeData(query: string) {
     // Fetch transcripts using our API endpoint
     logger.info(`Fetching transcripts for ${videoIds.length} videos`);
 
-    // Use a fully qualified URL for server-side fetching
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    // Use a relative URL to avoid cross-origin and authorization issues
+    const apiUrl = "/api/transcripts";
 
     // For better performance, we'll split the video IDs into smaller batches
     // and process them in parallel if there are many videos
     let transcriptResponse: Record<string, string> = {};
 
     try {
-      const response = await fetch(`${baseUrl}/api/transcripts`, {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
