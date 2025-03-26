@@ -195,8 +195,23 @@ async function fetchYoutubeData(query: string) {
     // Fetch transcripts using our API endpoint
     logger.info(`Fetching transcripts for ${videoIds.length} videos`);
 
-    // Use a relative URL to avoid cross-origin and authorization issues
-    const apiUrl = "/api/transcripts";
+    // We need to handle URLs differently in server components
+    // For server components, we need an absolute URL (internal or external)
+    let apiUrl;
+
+    // Check if we're in a browser environment
+    if (typeof window === "undefined") {
+      // Server-side: need to use absolute URL
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      apiUrl = `${baseUrl}/api/transcripts`;
+      logger.debug(`Using server-side URL: ${apiUrl}`);
+    } else {
+      // Client-side: can use relative URL
+      apiUrl = "/api/transcripts";
+      logger.debug(`Using client-side URL: ${apiUrl}`);
+    }
 
     // For better performance, we'll split the video IDs into smaller batches
     // and process them in parallel if there are many videos
