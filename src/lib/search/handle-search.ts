@@ -202,13 +202,14 @@ async function fetchYoutubeData(query: string) {
     // Check if we're in a browser environment
     if (typeof window === "undefined") {
       // Server-side: need to use absolute URL
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      apiUrl = `${baseUrl}/api/transcripts`;
-      logger.debug(`Using server-side URL: ${apiUrl}`);
+      // For Server API routes calling other API routes in the same app, we should
+      // use a relative URL to avoid authentication issues
 
-      // Log all environment variables to help debug
+      // This is a key change: In server components, we should ALWAYS use a relative URL
+      // when accessing our own API routes to avoid authentication issues
+      apiUrl = "/api/transcripts";
+
+      logger.debug(`Using relative API URL for server-side: ${apiUrl}`);
       logger.debug(`Environment variables for debugging:
         VERCEL_URL: ${process.env.VERCEL_URL || "not set"}
         NEXT_PUBLIC_APP_URL: ${process.env.NEXT_PUBLIC_APP_URL || "not set"}
