@@ -5,13 +5,11 @@
   "functions": {
     "app/api/transcripts/route": {
       "memory": 1024,
-      "maxDuration": 60,
-      "runtime": "nodejs@18.x"
+      "maxDuration": 60
     },
     "app/api/autocomplete/route": {
       "memory": 512,
-      "maxDuration": 10,
-      "runtime": "nodejs@18.x"
+      "maxDuration": 10
     }
   },
   "env": {
