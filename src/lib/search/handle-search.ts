@@ -9,6 +9,7 @@ import getYoutubeResults from "../youtube/get-youtube-results";
 import analyzeTranscriptGpt from "../openai/analyze-transcript-gpt";
 import summarizeProductGpt from "../openai/summarize-product-gpt";
 import { logger } from "../logger";
+import { fetchTranscript } from "../youtube/youtube-api";
 
 type SearchResults = {
   reviews: ReviewItem[];
@@ -195,73 +196,41 @@ async function fetchYoutubeData(query: string) {
     // Fetch transcripts using our API endpoint
     logger.info(`Fetching transcripts for ${videoIds.length} videos`);
 
-    // We need to handle URLs differently in server components
-    // For server components, we need an absolute URL (internal or external)
-    let apiUrl: string;
-
-    // Check if we're in a browser environment
-    if (typeof window === "undefined") {
-      // Server-side: when running in a server environment, we need to use different
-      // strategies for local development vs. production
-
-      // Make API request directly to our own local route handlers - making them "connected"
-      // This makes the API call remain within the Next.js server rather than making an HTTP request
-      apiUrl = "/api/transcripts";
-
-      logger.debug(`Using direct API route in server-side context: ${apiUrl}`);
-      logger.debug(`Environment variables for debugging:
-        VERCEL_URL: ${process.env.VERCEL_URL || "not set"}
-        NEXT_PUBLIC_APP_URL: ${process.env.NEXT_PUBLIC_APP_URL || "not set"}
-        NODE_ENV: ${process.env.NODE_ENV || "not set"}
-      `);
-    } else {
-      // Client-side: can use relative URL
-      apiUrl = "/api/transcripts";
-      logger.debug(`Using client-side URL: ${apiUrl}`);
-    }
-
     let transcriptResponse: Record<string, string> = {};
 
     try {
-      logger.debug(`Making POST request to: ${apiUrl}`);
-      logger.debug(
-        `Request payload: ${JSON.stringify({ video_ids: videoIds })}`
+      // Instead of making an HTTP request to our own API, directly use the fetchTranscript function
+      logger.info(
+        `Directly fetching transcripts for ${videoIds.length} videos`
       );
 
-      // Important: Next.js fetch in server components works differently than in the browser
-      // It automatically resolves relative URLs to the correct route handler
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Process each video ID and fetch transcripts directly
+      const transcriptPromises = videoIds.map(async (videoId: string) => {
+        try {
+          logger.debug(`Fetching transcript for video ${videoId}`);
+          const transcript = await fetchTranscript(videoId);
+          return { videoId, transcript };
+        } catch (error) {
+          logger.error(
+            `Error fetching transcript for video ${videoId}:`,
+            error
+          );
+          return { videoId, transcript: "none" };
+        }
+      });
+
+      // Wait for all transcript fetch operations to complete
+      const transcriptResults = await Promise.all(transcriptPromises);
+
+      // Convert array of results to an object with video IDs as keys
+      transcriptResponse = transcriptResults.reduce(
+        (acc, { videoId, transcript }) => {
+          acc[videoId] = transcript;
+          return acc;
         },
-        body: JSON.stringify({ video_ids: videoIds }),
-        // Ensure we don't reuse cached responses
-        cache: "no-store",
-        // This makes API requests within the same Next.js instance work properly
-        next: { revalidate: 0 },
-      });
+        {} as Record<string, string>
+      );
 
-      logger.debug(`Response status: ${response.status}`);
-      logger.debug(`Response status text: ${response.statusText}`);
-
-      // Log response headers
-      const headers: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-      logger.debug(`Response headers: ${JSON.stringify(headers)}`);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        logger.error(
-          `Error fetching transcripts: API returned status: ${response.status}`
-        );
-        logger.error(`Error response body: ${errorText}`);
-        throw new Error(`API returned status: ${response.status}`);
-      }
-
-      transcriptResponse = await response.json();
       logger.info(
         `Received transcript data for ${
           Object.keys(transcriptResponse).length
