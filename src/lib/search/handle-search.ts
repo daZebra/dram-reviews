@@ -106,16 +106,14 @@ export default async function handleSearch(
     logger.info(
       `No existing data, fetching from YouTube for: "${normalizedQuery}"`
     );
-    const { videoResults, transcriptResponse } = await fetchYoutubeData(
-      normalizedQuery
-    );
-    logger.info(`Fetched ${videoResults.length} YouTube videos`);
+    const youtubeData = await fetchYoutubeData(normalizedQuery);
+    logger.info(`Fetched ${youtubeData.results.length} YouTube videos`);
 
     logger.info(`Processing transcripts for analysis`);
     const analyzedTranscripts = await processTranscripts(
-      transcriptResponse,
+      youtubeData.results.map((video) => video.transcript || "none"),
       normalizedQuery,
-      videoResults
+      youtubeData.results
     );
 
     logger.info(`Processed ${analyzedTranscripts.length} transcripts`);
@@ -130,8 +128,13 @@ export default async function handleSearch(
     await updateDatabase(
       analyzedTranscripts,
       normalizedQuery,
-      videoResults,
-      transcriptResponse
+      youtubeData.results,
+      youtubeData.results.reduce((acc, video) => {
+        if (video.id && video.transcript) {
+          acc[video.id] = video.transcript;
+        }
+        return acc;
+      }, {} as Record<string, string>)
     );
 
     // Fetch the updated data after saving to database
@@ -196,7 +199,7 @@ async function fetchYoutubeData(query: string) {
     // Fetch transcripts using our API endpoint
     logger.info(`Fetching transcripts for ${videoIds.length} videos`);
 
-    let transcriptResponse: Record<string, string> = {};
+    let transcriptResponses: string[] = [];
 
     try {
       // Instead of making an HTTP request to our own API, directly use the fetchTranscript function
@@ -209,47 +212,47 @@ async function fetchYoutubeData(query: string) {
         try {
           logger.debug(`Fetching transcript for video ${videoId}`);
           const transcript = await fetchTranscript(videoId);
-          return { videoId, transcript };
+          return transcript;
         } catch (error) {
-          logger.error(
-            `Error fetching transcript for video ${videoId}:`,
-            error
-          );
-          return { videoId, transcript: "none" };
+          // Better error categorization
+          if (
+            error instanceof Error &&
+            error.message.includes("Transcript is disabled")
+          ) {
+            logger.warn(
+              `No transcript available for video ${videoId} - Transcripts are disabled for this video`
+            );
+          } else if (
+            error instanceof Error &&
+            error.message.includes("No transcript")
+          ) {
+            logger.warn(
+              `No transcript available for video ${videoId} - No captions found`
+            );
+          } else {
+            logger.error(
+              `Error fetching transcript for video ${videoId}:`,
+              error
+            );
+          }
+          return "none";
         }
       });
 
       // Wait for all transcript fetch operations to complete
-      const transcriptResults = await Promise.all(transcriptPromises);
-
-      // Convert array of results to an object with video IDs as keys
-      transcriptResponse = transcriptResults.reduce(
-        (acc, { videoId, transcript }) => {
-          acc[videoId] = transcript;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      transcriptResponses = await Promise.all(transcriptPromises);
 
       logger.info(
-        `Received transcript data for ${
-          Object.keys(transcriptResponse).length
-        } videos`
+        `Received transcript data for ${transcriptResponses.length} videos`
       );
     } catch (error) {
       logger.error(`Error fetching transcripts:`, error);
       // Create empty placeholders on error
-      transcriptResponse = videoIds.reduce(
-        (acc: Record<string, string>, id: string) => {
-          acc[id] = "none";
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      transcriptResponses = videoIds.map(() => "none");
     }
 
     // Pre-validate the transcripts to see if we have any potentially usable ones
-    const usableTranscripts = Object.values(transcriptResponse).filter(
+    const usableTranscripts = transcriptResponses.filter(
       (transcript) =>
         transcript && transcript !== "none" && transcript.length > 50
     );
@@ -259,16 +262,60 @@ async function fetchYoutubeData(query: string) {
     );
 
     if (usableTranscripts.length === 0) {
-      logger.warn(`No valid transcripts found, search may not yield results`);
       logger.warn(
-        `To enable transcript fetching, make sure the API is properly configured and the youtube-transcript package is installed.`
+        `No valid transcripts found for videos. This is likely because:`
+      );
+      logger.warn(
+        `1. The YouTube creators have not added captions/subtitles to their videos`
+      );
+      logger.warn(
+        `2. Automatic caption generation is disabled for these videos`
+      );
+      logger.warn(
+        `3. The videos are in a language not supported by our transcript system`
       );
     }
 
-    return { videoResults, transcriptResponse };
+    // Only include videos that have usable transcripts or fallback to title/description if none available
+    const youtubeVideosWithTranscripts = await Promise.all(
+      transcriptResponses.map(async (transcript: string, index: number) => {
+        const video = videoResults[index];
+
+        // Clean up transcript or handle missing transcript
+        let processedTranscript: string;
+
+        if (transcript === "none" || !transcript) {
+          // Use title and description as fallback when transcript is unavailable
+          logger.warn(
+            `No transcript for ${video.id}, using title/description as fallback`
+          );
+          processedTranscript = `${video.title} ${
+            video.description || ""
+          }`.trim();
+        } else {
+          // We have a transcript, clean it up
+          processedTranscript = transcript
+            .replace(/\n/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+        }
+
+        // Always include the video in results, using the best available text
+        return {
+          ...video,
+          transcript: processedTranscript,
+        };
+      })
+    );
+
+    // Always return all videos, even if some don't have proper transcripts
+    return {
+      results: youtubeVideosWithTranscripts,
+      totalResults: youtubeVideosWithTranscripts.length,
+    };
   } catch (error) {
-    logger.error(`Error fetching YouTube data:`, error);
-    throw error; // Re-throw to be handled by the caller
+    logger.error("Error in fetchYoutubeData", error);
+    return { results: [], totalResults: 0 };
   }
 }
 
@@ -509,49 +556,40 @@ function isLikelyWhiskyReview(transcript: string): boolean {
 }
 
 async function processTranscripts(
-  transcriptResponse: Record<string, string>,
+  transcripts: string[],
   query: string,
   videoResults: VideoResult[]
 ) {
   logger.info(`Processing transcripts for query: "${query}"`);
 
-  // Create a map of video IDs to video results for easier access
-  const videoMap = videoResults.reduce((map, video) => {
-    map[video.id] = video;
-    return map;
-  }, {} as Record<string, VideoResult>);
+  // Prepare video objects with their transcripts
+  const videoWithTranscripts = videoResults.map((video, index) => ({
+    videoId: video.id,
+    transcript: transcripts[index] || "",
+    videoData: video,
+  }));
 
   // First, filter for reasonably sized transcripts and pre-screen for whisky content
-  const validTranscripts = Object.entries(transcriptResponse)
+  const validTranscripts = videoWithTranscripts
     .filter(
-      ([videoId, transcript]) =>
-        transcript &&
-        transcript !== "none" &&
-        transcript.length > 100 &&
-        videoMap[videoId]
+      (item) =>
+        item.transcript &&
+        item.transcript !== "none" &&
+        item.transcript.length > 100
     )
-    .filter(([videoId, transcript]) => {
+    .filter((item) => {
       // Pre-screen for whisky content
-      const isWhiskyRelated = isLikelyWhiskyReview(transcript);
+      const isWhiskyRelated = isLikelyWhiskyReview(item.transcript);
       if (!isWhiskyRelated) {
         logger.info(
-          `Video ${videoId} doesn't appear to be a whisky review - skipping AI analysis`
+          `Video ${item.videoId} doesn't appear to be a whisky review - skipping AI analysis`
         );
       }
       return isWhiskyRelated;
-    })
-    .map(([videoId, transcript]) => ({
-      videoId,
-      transcript,
-      videoData: videoMap[videoId],
-    }));
+    });
 
   logger.info(
-    `Found ${
-      validTranscripts.length
-    } probable whisky review transcripts out of ${
-      Object.keys(transcriptResponse).length
-    }`
+    `Found ${validTranscripts.length} probable whisky review transcripts out of ${videoWithTranscripts.length}`
   );
 
   // If we have enough pre-screened transcripts, analyze them
