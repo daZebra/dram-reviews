@@ -40,8 +40,6 @@ A Next.js application for searching and analyzing whisky reviews from YouTube vi
 ### Prerequisites
 
 - Node.js (v16+)
-- Python 3.6+ (for the YouTube Transcript API)
-- pip (Python package manager)
 
 ### Installation
 
@@ -58,17 +56,7 @@ cd whisky-reviews
 npm install
 ```
 
-3. Install Python dependencies (required for transcript extraction):
-
-```bash
-# Option 1: Using our helper script (recommended)
-node src/lib/youtube/install-deps.js
-
-# Option 2: Manual installation
-pip install youtube-transcript-api
-```
-
-4. Setup environment variables (create a `.env.local` file in the root directory):
+3. Setup environment variables (create a `.env.local` file in the root directory):
 
 ```
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -77,27 +65,13 @@ YOUTUBE_API_KEY="your-youtube-api-key"
 OPENAI_API_KEY="your-openai-api-key"
 ```
 
-5. Start the development server:
+4. Start the development server:
 
 ```bash
 npm run dev
 ```
 
 ## Common Issues
-
-### Missing Python Dependencies
-
-If you see an error message like `ModuleNotFoundError: No module named 'youtube_transcript_api'`, you need to install the required Python package:
-
-```bash
-pip install youtube-transcript-api
-```
-
-You can also run our helper script which will check and install the dependencies for you:
-
-```bash
-node src/lib/youtube/install-deps.js
-```
 
 ### URL Error in Server Components
 
@@ -124,7 +98,7 @@ node src/lib/youtube/test-api.js
 ## Development Notes
 
 - The application uses the YouTube Data API to search for videos
-- Transcripts are fetched using the YouTube Transcript API (Python library)
+- Transcripts are fetched using the youtube-transcript npm package
 - OpenAI's GPT models are used to analyze video transcripts and extract structured data
 - Results are stored in a database for faster retrieval on subsequent searches
 
