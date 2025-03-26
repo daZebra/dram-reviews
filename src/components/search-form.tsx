@@ -9,18 +9,44 @@ export default function SearchForm() {
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    console.log(
+      `[SearchForm] Search text changed: "${searchText}" (${searchText.length} characters)`
+    );
+
     if (searchText.length >= 4) {
+      setIsLoading(true);
+      console.log(
+        `[SearchForm] Fetching autocomplete suggestions for: "${searchText}"`
+      );
+
       fetch(`/api/autocomplete?query=${encodeURIComponent(searchText)}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setSuggestions(data.productNames || []); // Use productNames from the response
+        .then((response) => {
+          if (!response.ok) {
+            console.error(
+              `[SearchForm] Autocomplete API returned status: ${response.status}`
+            );
+            return { productNames: [] };
+          }
+          return response.json();
         })
-        .catch(() => {
+        .then((data) => {
+          console.log(
+            `[SearchForm] Received ${
+              data.productNames?.length || 0
+            } suggestions:`,
+            data.productNames
+          );
+          setSuggestions(data.productNames || []);
+        })
+        .catch((error) => {
+          console.error(`[SearchForm] Autocomplete API error:`, error);
           setSuggestions([]);
-        });
+        })
+        .finally(() => setIsLoading(false));
     } else {
       setSuggestions([]);
     }
@@ -28,13 +54,28 @@ export default function SearchForm() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log(
+      `[SearchForm] Form submitted with search text: "${searchText}"`
+    );
+
     if (!searchText || searchText.length <= MIN_SEARCH_CHAR) {
+      console.warn(
+        `[SearchForm] Search text too short (${searchText.length} chars, min: ${MIN_SEARCH_CHAR})`
+      );
       setError("Please enter a longer product name.");
       return;
     } else {
       setError("");
-      router.push(`/product/${encodeURIComponent(searchText)}`);
+      const encodedSearchText = encodeURIComponent(searchText);
+      console.log(`[SearchForm] Redirecting to: /product/${encodedSearchText}`);
+      router.push(`/product/${encodedSearchText}`);
     }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    console.log(`[SearchForm] Suggestion selected: "${suggestion}"`);
+    setSearchText(suggestion);
+    setSuggestions([]);
   };
 
   return (
@@ -52,17 +93,20 @@ export default function SearchForm() {
             className="input input-primary input-lg w-full"
             placeholder="e.g. Highland Park 12"
             spellCheck="false"
+            aria-label="Search for whisky"
           />
+          {isLoading && (
+            <div className="text-sm text-gray-500 mt-1">
+              Loading suggestions...
+            </div>
+          )}
           {suggestions.length > 0 && (
             <ul className="autocomplete-results bg-base-200/60 rounded-lg">
               {suggestions.map((name, index) => (
                 <li
                   key={index}
                   className="p-2 hover:bg-base-200 cursor-pointer "
-                  onClick={() => {
-                    setSearchText(name);
-                    setSuggestions([]);
-                  }}
+                  onClick={() => handleSuggestionClick(name)}
                 >
                   {titleCase(name)}
                 </li>

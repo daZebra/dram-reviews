@@ -1,4 +1,5 @@
 import getScoreColor from "@/lib/get-score-color";
+import { decodeHtmlEntities } from "@/lib/utils";
 import Image from "next/image";
 
 type QuoteCardProps = {
@@ -16,6 +17,10 @@ export default function QuoteCard({
 }: QuoteCardProps) {
   const scoreColor = getScoreColor({ score: overallRating, denominator: 10 });
 
+  // Decode HTML entities
+  const decodedQuote = decodeHtmlEntities(quote);
+  const decodedChannelTitle = decodeHtmlEntities(channelTitle);
+
   return (
     <div className="flex flex-col bg-white shadow-md shadow-base-200 rounded-lg p-4 gap-2 border min-w-sm h-fit  border-neutral-100 ">
       <div className="flex justify-between items-center gap-1">
@@ -25,13 +30,15 @@ export default function QuoteCard({
             {/* Container to hold the image */}
             <Image
               src={`${thumbnailUrl}`}
-              alt="image"
+              alt={decodedChannelTitle}
               layout="fill" // This tells the Image component to fill the container
               objectFit="cover" // Change to 'fill' to stretch and fill the area
               className="rounded-full" // Maintains the rounded corners
             />
           </div>
-          <p className="text-sm text-accent text-medium ">{channelTitle}</p>
+          <p className="text-sm text-accent text-medium ">
+            {decodedChannelTitle}
+          </p>
         </div>
         <div className="flex justify-center gap-0 items-center min-w-10">
           <span className={`text-md text-${scoreColor} font-bold`}>
@@ -40,7 +47,7 @@ export default function QuoteCard({
           <span className=" text-xs text-base-content/40">/10</span>
         </div>
       </div>
-      <p className="text-sm text-neutral/80">{quote}</p>
+      <p className="text-sm text-neutral/80">{decodedQuote}</p>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import getScoreColor from "@/lib/get-score-color";
+import { decodeHtmlEntities } from "@/lib/utils";
 import Image from "next/image";
 
 type VideoCardProps = {
@@ -21,7 +22,12 @@ export default function VideoCard({
   videoId,
 }: VideoCardProps) {
   const scoreColor = getScoreColor({ score: score, denominator: 100 });
-  // console.log(scoreColor);
+
+  // Decode HTML entities in text fields
+  const decodedTitle = decodeHtmlEntities(title);
+  const decodedChannelTitle = decodeHtmlEntities(channelTitle);
+  const decodedQuote = decodeHtmlEntities(quote);
+
   return (
     <div className="flex md:flex-col bg-white shadow-md shadow-base-200 rounded-xl p-3 gap-4 border min-w-sm  border-neutral-100 h-fit">
       <div className="relative min-w-28 min-h-28 md:w-full md:h-32 bg-neutral rounded-lg overflow-hidden ">
@@ -58,14 +64,14 @@ export default function VideoCard({
       <div className="flex flex-col gap-1 ">
         <div className="flex flex-col  md:flex-row justify-between">
           <p className="text-sm text-accent order-last md:order-first text-medium  ">
-            @{channelTitle}
+            @{decodedChannelTitle}
           </p>
           <p className="text-sm text-base-content/40 text-medium align-right min-w-20 ">
             {date}
           </p>
         </div>
-        <p className="text-md font-bold line-clamp-2">{title}</p>
-        <p className="text-sm text-base-content/80">{quote}</p>
+        <p className="text-md font-bold line-clamp-2">{decodedTitle}</p>
+        <p className="text-sm text-base-content/80">{decodedQuote}</p>
       </div>
 
       {/* <div className="hidden md:hidden items-center w-12 text-center  md:w-full bg-base-200/60 text-base-content justify-center text-xs md:text-sm p-2 rounded-lg font-medium">

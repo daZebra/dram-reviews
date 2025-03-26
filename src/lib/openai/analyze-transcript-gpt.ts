@@ -1,17 +1,18 @@
 import axios, { AxiosError } from "axios";
+import { logger } from "../logger";
 
 const assistantPrompt = () => {
   return `
   You will receive a transcript from a Youtube video reviewing a whisky bottle.
-  First read the review carefully.
-  If there are no mention of whisky, return "NOT A WHISKY REVIEW"
-  If you suspect errors in the transcript, correct them. Errors can include mispelled product name, unecessary capitalization, or errors in transcription.
+  Analyze the transcript to extract the following information and respond in JSON format. Do not omit any fields.
+  If there are no mention of whisky or this is not a whisky review, respond with {"is_whisky_review": false} and nothing else.
+  If you suspect errors in the transcript, correct them when extracting information. Errors can include misspelled product names, unnecessary capitalization, or transcription errors.
   Avoid generating scores of 80 or 8/10. Rate good reviews higher than 80% and bad reviews lower than 80%.
   If many whiskies are mentioned in the transcript, only pay attention to the one I asked you to review.
-  Analyze the transcript to extract the following information and respond in JSON format. Do not ommit any fields.
 
-Example of expected output:
+Example of expected output for a whisky review:
 {
+  "is_whisky_review": true,
   "age": "12",  // If not specified, put "non-age statement". Do not leave empty.
   "region": "Highlands", // Specify the region. For Scotch, choose one of Campbeltown, Highland, Islay, Lowland and Speyside, or Islands (if Islands, specify which). For other regions, specify the country.
   "abv": "43", // Specify the numerical value of the ABV in string format. Convert Proof to ABC, e.g. 101 Proof = 50.5% ABV.
@@ -33,11 +34,26 @@ Example of expected output:
 };
 
 async function analyzeTranscriptGpt(transcriptText: string, query: string) {
+  logger.info(`[analyzeTranscript] Analyzing transcript for query: "${query}"`);
+  logger.info(
+    `[analyzeTranscript] Transcript length: ${transcriptText.length} characters`
+  );
+
   const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    logger.error(`[analyzeTranscript] OpenAI API key is missing!`);
+    throw new Error("OpenAI API key is not configured.");
+  }
+
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const assistantMessage = assistantPrompt();
 
   try {
+    logger.info(
+      `[analyzeTranscript] Sending request to OpenAI API using model: gpt-4o-mini`
+    );
+
     const response = await axios.post(
       apiUrl,
       {
@@ -61,24 +77,74 @@ async function analyzeTranscriptGpt(transcriptText: string, query: string) {
     );
 
     if (response.status === 200 && response.data.choices.length > 0) {
+      logger.info(
+        `[analyzeTranscript] Received successful response from OpenAI API`
+      );
       // Extract the content from the first choice's message
       const content = response.data.choices[0].message.content;
-      console.log(
-        "---------ChatGPT Analyzed Transcript -------- ",
-        content
-        // response.data.choices[0].finish_reason
-      );
-      return JSON.parse(content); // Assuming the content is in JSON string format
+
+      try {
+        const parsedContent = JSON.parse(content);
+        logger.info(
+          `[analyzeTranscript] Successfully parsed JSON response from OpenAI`
+        );
+
+        // Check if it's not a whisky review - either through the new format or old format
+        if (
+          parsedContent.is_whisky_review === false ||
+          content.includes("NOT A WHISKY REVIEW")
+        ) {
+          logger.warn(
+            `[analyzeTranscript] GPT determined this is not a whisky review`
+          );
+          return null;
+        }
+
+        // Log some key fields for debugging
+        logger.info(`[analyzeTranscript] Analysis results:
+          - Product: ${query}
+          - Age: ${parsedContent.age}
+          - Region: ${parsedContent.region}
+          - ABV: ${parsedContent.abv}
+          - Sentiment score: ${parsedContent.sentimentScore}
+          - Overall score: ${parsedContent.overallScore}
+        `);
+
+        return parsedContent;
+      } catch (parseError) {
+        logger.error(
+          `[analyzeTranscript] Failed to parse OpenAI response as JSON:`,
+          parseError
+        );
+        logger.error(`[analyzeTranscript] Raw response content:`, content);
+        return null;
+      }
     } else {
-      console.error("Non-200 response or no choices available", response.data);
-      return {
-        error:
-          "API request did not return a success status or no choices available.",
-      };
+      logger.error(
+        `[analyzeTranscript] Non-200 response or no choices available:`,
+        {
+          status: response.status,
+          statusText: response.statusText,
+          choices: response.data.choices?.length || 0,
+        }
+      );
+      return null;
     }
   } catch (error: any) {
-    console.error("Axios error response:", error.response?.data);
-    return { error: "Error during API call to OpenAI." };
+    if (axios.isAxiosError(error)) {
+      logger.error(
+        `[analyzeTranscript] OpenAI API error (${
+          error.response?.status || "unknown"
+        }):`,
+        error.response?.data || error.message
+      );
+    } else {
+      logger.error(
+        `[analyzeTranscript] Error during API call to OpenAI:`,
+        error
+      );
+    }
+    return null;
   }
 }
 

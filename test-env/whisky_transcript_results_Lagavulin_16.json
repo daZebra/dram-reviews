@@ -1,0 +1,29 @@
+{
+  "whisky_name": "Lagavulin 16",
+  "video_count": 4,
+  "success_count": 0,
+  "fail_count": 4,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "video_id": "Zk-a_cFPmMs",
+      "success": false,
+      "error": "VideoUnavailable: \nCould not retrieve a transcript for the video https://www.youtube.com/watch?v=Zk-a_cFPmMs! This is most likely caused by:\n\nThe video is no longer available\n\nIf you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!"
+    },
+    {
+      "video_id": "0m_OKcjEGXs",
+      "success": false,
+      "error": "VideoUnavailable: \nCould not retrieve a transcript for the video https://www.youtube.com/watch?v=0m_OKcjEGXs! This is most likely caused by:\n\nThe video is no longer available\n\nIf you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!"
+    },
+    {
+      "video_id": "1M_4Th0OT_8",
+      "success": false,
+      "error": "VideoUnavailable: \nCould not retrieve a transcript for the video https://www.youtube.com/watch?v=1M_4Th0OT_8! This is most likely caused by:\n\nThe video is no longer available\n\nIf you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!"
+    },
+    {
+      "video_id": "AJeK14urLME",
+      "success": false,
+      "error": "VideoUnavailable: \nCould not retrieve a transcript for the video https://www.youtube.com/watch?v=AJeK14urLME! This is most likely caused by:\n\nThe video is no longer available\n\nIf you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!"
+    }
+  ]
+}

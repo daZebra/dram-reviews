@@ -31,15 +31,30 @@ Example of expected output:
 };
 
 const summarizeProductGpt = async (reviewObjects: string) => {
-  const apiKey = process.env.OPENAI_API_KEY; // Ensure your API key is stored securely in environment variables
+  console.log(`[summarizeProduct] Starting product summarization`);
+  console.log(
+    `[summarizeProduct] Input data length: ${reviewObjects.length} characters`
+  );
+
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    console.error(`[summarizeProduct] OpenAI API key is missing!`);
+    throw new Error("OpenAI API key is not configured.");
+  }
+
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const assistantMessage = assistantPrompt();
 
   try {
+    console.log(
+      `[summarizeProduct] Sending request to OpenAI API using model: gpt-4o-mini`
+    );
+
     const response = await axios.post(
       apiUrl,
       {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: assistantMessage },
           { role: "user", content: reviewObjects },
@@ -55,28 +70,62 @@ const summarizeProductGpt = async (reviewObjects: string) => {
     );
 
     if (response.status === 200 && response.data.choices.length > 0) {
-      // Extract the content from the first choice's message
+      console.log(
+        `[summarizeProduct] Received successful response from OpenAI API`
+      );
       const content = response.data.choices[0].message.content;
 
-      // console.log(
-      //   " ---------- Analyze Transcript Finish Reason ----------: " +
-      //     response.data.choices[0].finish_reason
-      // );
-      // console.log(
-      //   " ---------- Analyze Transcript Response ----------: " + content
-      // );
+      try {
+        const parsedContent = JSON.parse(content);
+        console.log(`[summarizeProduct] Successfully parsed JSON response`);
 
-      return JSON.parse(content); // Assuming the content is in JSON string format
+        // Log some key fields for debugging
+        console.log(`[summarizeProduct] Summary results:
+          - Whisky Name: ${parsedContent.whiskyName}
+          - Age: ${parsedContent.age}
+          - Region: ${parsedContent.region}
+          - ABV: ${parsedContent.abv}
+          - Sentiment score: ${parsedContent.sentimentScore}
+          - Overall score: ${parsedContent.overallScore}
+        `);
+
+        return parsedContent;
+      } catch (parseError) {
+        console.error(
+          `[summarizeProduct] Failed to parse OpenAI response as JSON:`,
+          parseError
+        );
+        console.error(`[summarizeProduct] Raw response content:`, content);
+        throw new Error("Failed to parse product summary response");
+      }
     } else {
-      console.error("Non-200 response or no choices available", response.data);
-      return {
-        error:
-          "API request did not return a success status or no choices available.",
-      };
+      console.error(
+        `[summarizeProduct] Non-200 response or no choices available:`,
+        {
+          status: response.status,
+          statusText: response.statusText,
+          choices: response.data.choices?.length || 0,
+        }
+      );
+      throw new Error(
+        "API request did not return a success status or no choices available"
+      );
     }
-  } catch (error: AxiosError | any) {
-    console.error("Axios error response:", error.response?.data);
-    return { error: "Error during API call to OpenAI." };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `[summarizeProduct] OpenAI API error (${
+          error.response?.status || "unknown"
+        }):`,
+        error.response?.data || error.message
+      );
+    } else {
+      console.error(
+        `[summarizeProduct] Error during API call to OpenAI:`,
+        error
+      );
+    }
+    throw error;
   }
 };
 

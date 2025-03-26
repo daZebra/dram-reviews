@@ -1,0 +1,17 @@
+{
+  "buildCommand": "pip install youtube-transcript-api && next build",
+  "installCommand": "npm install && pip install youtube-transcript-api",
+  "functions": {
+    "api/transcripts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_APP_URL": {
+      "development": "http://localhost:3000",
+      "preview": "${VERCEL_URL}",
+      "production": "https://${VERCEL_URL}"
+    }
+  }
+}

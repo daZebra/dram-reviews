@@ -6,7 +6,7 @@ import { RadialProgress } from "@/components/radial-progress";
 import RatingBar from "@/components/rating-bar";
 import VideoCard from "@/components/video-card";
 import handleSearch from "@/lib/search/handle-search";
-import { titleCase } from "@/lib/utils";
+import { titleCase, serverDecodeHtmlEntities } from "@/lib/utils";
 import { ReviewItem } from "@prisma/client";
 
 import {
@@ -21,26 +21,52 @@ type Props = {
 };
 
 export default async function Review({ params }: Props) {
+  console.log(`[ProductPage] Rendering product page with params:`, params);
+
   if (!params.product) {
-    return <ProductPageEmptyState />;
+    console.warn(`[ProductPage] No product parameter found in URL`);
+    return <ProductPageEmptyState message="No product specified in search." />;
   }
 
   const productName = decodeURIComponent(params.product);
+  console.log(`[ProductPage] Decoded product name: "${productName}"`);
 
   try {
+    console.log(`[ProductPage] Calling handleSearch for: "${productName}"`);
     const result = await handleSearch(productName);
 
     if (!result) {
-      return <ProductPageEmptyState />;
+      console.warn(
+        `[ProductPage] handleSearch returned no results for: "${productName}"`
+      );
+      return (
+        <ProductPageEmptyState
+          message={`We couldn't find any information for "${productName}". Try a different search.`}
+        />
+      );
     }
-    const { product, reviews } = result;
 
-    console.log(product);
+    const { product, reviews, totalCount } = result;
+    console.log(
+      `[ProductPage] Search results: ${totalCount} reviews, product ${
+        product ? "found" : "not found"
+      }`
+    );
 
     if (!reviews || !product) {
-      return <ProductPageEmptyState />;
+      console.warn(
+        `[ProductPage] No reviews or product data found for: "${productName}"`
+      );
+      return (
+        <ProductPageEmptyState
+          message={`No detailed information available for "${productName}". Try searching for a popular whisky brand.`}
+        />
+      );
     }
-    // console.log(product);
+
+    console.log(
+      `[ProductPage] Rendering product page for: "${product.productName}" with ${reviews.length} reviews`
+    );
 
     return (
       <section className="bg-white  py-10">
@@ -137,60 +163,86 @@ export default async function Review({ params }: Props) {
                 </div>
               </div>
             </div>
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
-              {reviews.map((review: ReviewItem) => (
-                <div key={review.videoId} className="break-inside-avoid mb-4">
-                  <QuoteCard
-                    key={review.videoId}
-                    thumbnailUrl={review.thumbnailUrl}
-                    quote={
-                      (JSON.parse(review.tasteQuotes)[0] || "") +
-                      " " +
-                      (JSON.parse(review.valueQuotes)[0] || "")
-                    }
-                    channelTitle={review.channelTitle}
-                    overallRating={review.overallScore}
-                  />
-                </div>
-              ))}
-            </div>
+            {reviews.length > 0 && (
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
+                {reviews.map((review: ReviewItem) => (
+                  <div key={review.videoId} className="break-inside-avoid mb-4">
+                    <QuoteCard
+                      key={review.videoId}
+                      thumbnailUrl={review.thumbnailUrl}
+                      quote={
+                        (JSON.parse(review.tasteQuotes)[0] || "") +
+                        " " +
+                        (JSON.parse(review.valueQuotes)[0] || "")
+                      }
+                      channelTitle={review.channelTitle}
+                      overallRating={review.overallScore}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
-          <section className="flex flex-col gap-4 w-full mx-auto">
-            <div className="font-bold text-sm bg-base-100  py-2 px-4 mt-8 rounded-md">
-              Reviews
-            </div>
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
-              {reviews.map((review: ReviewItem) => (
-                <div key={review.videoId} className="break-inside-avoid mb-4">
-                  <VideoCard
-                    key={review.videoId}
-                    thumbnailUrl={review.thumbnailUrl}
-                    quote={review.opinionQuote}
-                    channelTitle={review.channelTitle}
-                    score={review.sentimentScore}
-                    date={new Date(review.publishedAt)
-                      .toISOString()
-                      .substring(0, 10)}
-                    title={review.title}
-                    videoId={review.videoId}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
+          {reviews.length > 0 && (
+            <section className="flex flex-col gap-4 w-full mx-auto">
+              <div className="font-bold text-sm bg-base-100  py-2 px-4 mt-8 rounded-md">
+                Reviews
+              </div>
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
+                {reviews.map((review: ReviewItem) => (
+                  <div key={review.videoId} className="break-inside-avoid mb-4">
+                    <VideoCard
+                      key={review.videoId}
+                      thumbnailUrl={review.thumbnailUrl}
+                      quote={serverDecodeHtmlEntities(
+                        review.opinionQuote || ""
+                      )}
+                      channelTitle={serverDecodeHtmlEntities(
+                        review.channelTitle
+                      )}
+                      score={review.sentimentScore}
+                      date={new Date(review.publishedAt)
+                        .toISOString()
+                        .substring(0, 10)}
+                      title={serverDecodeHtmlEntities(review.title)}
+                      videoId={review.videoId}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </section>
     );
   } catch (error) {
-    return <ProductPageEmptyState />;
+    console.error(
+      `[ProductPage] Error rendering product page for "${productName}":`,
+      error
+    );
+    return (
+      <ProductPageEmptyState message="An error occurred while processing your search. Please try again later." />
+    );
   }
 }
 
-function ProductPageEmptyState() {
+type EmptyStateProps = {
+  message?: string;
+};
+
+function ProductPageEmptyState({
+  message = "No results found, try a different search",
+}: EmptyStateProps) {
+  console.log(`[ProductPage] Rendering empty state with message: "${message}"`);
   return (
-    <section className="flex min-h-32 items-center p-30 justify-center max-w-6xl mx-auto">
-      <div className="flex text-xl font-medium text-base-content/80 text-center">
-        No results found, try a different search
+    <section className="flex min-h-80 items-center p-30 justify-center max-w-6xl mx-auto">
+      <div className="flex flex-col items-center justify-center gap-6 text-center">
+        <div className="text-xl font-medium text-base-content/80">
+          {message}
+        </div>
+        <a href="/" className="btn btn-primary">
+          Return to Search
+        </a>
       </div>
     </section>
   );

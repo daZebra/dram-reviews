@@ -101,7 +101,7 @@ export default function Home({ searchParams }: HomeProps) {
                     Peer reviews are too subjective to be useful.
                   </ListItem>
                   <ListItem sign={false}>
-                    Expert reviews would be great if they weren&#39;t buried in
+                    Expert reviews would be great if they weren't buried in
                     long-form videos.
                   </ListItem>
                   <ListItem sign={false}>
@@ -135,7 +135,7 @@ export default function Home({ searchParams }: HomeProps) {
 
       {/* VP1 Section */}
       <HomeSection
-        sectionTitle="All the Whisky Info You Need, None You Don&#39;t"
+        sectionTitle="All the Whisky Info You Need, None You Don't"
         sectionParagraph="Get straight to the point with streamlined summaries from expert
         reviewers, designed to quickly guide your next purchase."
         imgPath="/lottie-whisky-details.json"
@@ -171,8 +171,8 @@ export default function Home({ searchParams }: HomeProps) {
       <section className="flex justify-center w-full  py-32 bg-neutral-800 text-white">
         <div className="flex flex-col max-w-2xl px-4 text-center  items-center">
           <p className="text-2xl font-serif font-bold">
-            Dram Reviews makes it feel like I&#39;ve got a whisky expert right
-            by my side advising me on the best whiskies to try. I love it!
+            Dram Reviews makes it feel like I've got a whisky expert right by my
+            side advising me on the best whiskies to try. I love it!
           </p>
           <div className="flex items-start gap-2 mt-4">
             <Image

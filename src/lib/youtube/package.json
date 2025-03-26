@@ -1,0 +1,15 @@
+{
+  "name": "youtube-transcript-test",
+  "version": "1.0.0",
+  "description": "Test tools for YouTube transcript fetching",
+  "private": true,
+  "scripts": {
+    "test-ts": "npx ts-node transcript-test.ts",
+    "install-deps": "npm install axios ts-node typescript"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
