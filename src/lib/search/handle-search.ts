@@ -201,16 +201,14 @@ async function fetchYoutubeData(query: string) {
 
     // Check if we're in a browser environment
     if (typeof window === "undefined") {
-      // Server-side: For Node.js server environments, we need to use a fully qualified URL
-      // BUT we need to make sure we're making an internal request (same host)
-      // This avoids authentication requirements while ensuring a valid URL for fetch
+      // Server-side: when running in a server environment, we need to use different
+      // strategies for local development vs. production
 
-      // For an absolute URL that's treated as "same-origin" in Node.js environments
-      apiUrl = new URL("/api/transcripts", "http://localhost").href;
+      // Make API request directly to our own local route handlers - making them "connected"
+      // This makes the API call remain within the Next.js server rather than making an HTTP request
+      apiUrl = "/api/transcripts";
 
-      logger.debug(
-        `Using absolute but same-origin API URL for server-side: ${apiUrl}`
-      );
+      logger.debug(`Using direct API route in server-side context: ${apiUrl}`);
       logger.debug(`Environment variables for debugging:
         VERCEL_URL: ${process.env.VERCEL_URL || "not set"}
         NEXT_PUBLIC_APP_URL: ${process.env.NEXT_PUBLIC_APP_URL || "not set"}
@@ -230,12 +228,18 @@ async function fetchYoutubeData(query: string) {
         `Request payload: ${JSON.stringify({ video_ids: videoIds })}`
       );
 
+      // Important: Next.js fetch in server components works differently than in the browser
+      // It automatically resolves relative URLs to the correct route handler
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ video_ids: videoIds }),
+        // Ensure we don't reuse cached responses
+        cache: "no-store",
+        // This makes API requests within the same Next.js instance work properly
+        next: { revalidate: 0 },
       });
 
       logger.debug(`Response status: ${response.status}`);
