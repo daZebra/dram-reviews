@@ -197,7 +197,7 @@ async function fetchYoutubeData(query: string) {
 
     // We need to handle URLs differently in server components
     // For server components, we need an absolute URL (internal or external)
-    let apiUrl;
+    let apiUrl: string;
 
     // Check if we're in a browser environment
     if (typeof window === "undefined") {
@@ -207,56 +207,60 @@ async function fetchYoutubeData(query: string) {
         : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
       apiUrl = `${baseUrl}/api/transcripts`;
       logger.debug(`Using server-side URL: ${apiUrl}`);
+
+      // Log all environment variables to help debug
+      logger.debug(`Environment variables for debugging:
+        VERCEL_URL: ${process.env.VERCEL_URL || "not set"}
+        NEXT_PUBLIC_APP_URL: ${process.env.NEXT_PUBLIC_APP_URL || "not set"}
+        NODE_ENV: ${process.env.NODE_ENV || "not set"}
+      `);
     } else {
       // Client-side: can use relative URL
       apiUrl = "/api/transcripts";
       logger.debug(`Using client-side URL: ${apiUrl}`);
     }
 
-    // For better performance, we'll split the video IDs into smaller batches
-    // and process them in parallel if there are many videos
     let transcriptResponse: Record<string, string> = {};
 
     try {
+      logger.debug(`Making POST request to: ${apiUrl}`);
+      logger.debug(
+        `Request payload: ${JSON.stringify({ video_ids: videoIds })}`
+      );
+
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ video_ids: videoIds }),
-        cache: "no-store", // Ensure fresh response each time
       });
 
+      logger.debug(`Response status: ${response.status}`);
+      logger.debug(`Response status text: ${response.statusText}`);
+
+      // Log response headers
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      logger.debug(`Response headers: ${JSON.stringify(headers)}`);
+
       if (!response.ok) {
-        // Handle any dependency or API errors
-        if (response.status === 500) {
-          const errorData = await response.json();
-          if (errorData.error === "Dependency Error") {
-            logger.error(`Dependency error: ${errorData.message}`);
-            // Create empty placeholders
-            transcriptResponse = videoIds.reduce(
-              (acc: Record<string, string>, id: string) => {
-                acc[id] = "none";
-                return acc;
-              },
-              {} as Record<string, string>
-            );
-          } else {
-            throw new Error(
-              `API error: ${errorData.message || "Unknown error"}`
-            );
-          }
-        } else {
-          throw new Error(`API returned status: ${response.status}`);
-        }
-      } else {
-        transcriptResponse = await response.json();
-        logger.info(
-          `Received transcript data for ${
-            Object.keys(transcriptResponse).length
-          } videos`
+        const errorText = await response.text();
+        logger.error(
+          `Error fetching transcripts: API returned status: ${response.status}`
         );
+        logger.error(`Error response body: ${errorText}`);
+        throw new Error(`API returned status: ${response.status}`);
       }
+
+      transcriptResponse = await response.json();
+      logger.info(
+        `Received transcript data for ${
+          Object.keys(transcriptResponse).length
+        } videos`
+      );
     } catch (error) {
       logger.error(`Error fetching transcripts:`, error);
       // Create empty placeholders on error
