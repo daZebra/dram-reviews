@@ -8,10 +8,6 @@
     }
   },
   "env": {
-    "NEXT_PUBLIC_APP_URL": {
-      "development": "http://localhost:3000",
-      "preview": "${VERCEL_URL}",
-      "production": "https://${VERCEL_URL}"
-    }
+    "NEXT_PUBLIC_APP_URL": "https://${VERCEL_URL}"
   }
 }
